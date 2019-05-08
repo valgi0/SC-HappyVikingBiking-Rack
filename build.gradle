@@ -10,6 +10,9 @@ version '0.0'
 
 sourceCompatibility = 1.8
 
+//Main class name
+mainClassName = ''
+
 //List of variables used in the file.
 ext {
     //Scala version variables.
