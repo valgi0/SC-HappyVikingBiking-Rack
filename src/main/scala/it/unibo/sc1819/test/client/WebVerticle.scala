@@ -16,10 +16,10 @@ class WebVerticle extends ScalaVerticle {
       .consumer[String](MockClientMain.TOPIC_ADDRESS)
       .handler( message => {
         println("Oh no, message received")
-        webClient.get(8080, "192.168.1.155", "/lumbago")
+        webClient.get(8080, "127.0.0.1", "/lumbago")
           .sendFuture().onComplete{
           case Success(result) => {
-            println("Server respond " + result.body().get.toString)
+            println("Server respond " + result.body().get)
           }
           case Failure(cause) => {
             println(s"$cause")

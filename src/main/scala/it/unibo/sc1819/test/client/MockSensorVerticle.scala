@@ -8,7 +8,7 @@ class MockSensorVerticle extends ScalaVerticle {
     val vertx = MockClientMain.vertx
     val eventBus = vertx.eventBus()
 
-    vertx.setPeriodic(1000, _ => {
+    vertx.setPeriodic(5000, _ => {
       eventBus.publish(MockClientMain.TOPIC_ADDRESS, "Yay! Someone got lumbago! Notify the server!")
     })
   }
