@@ -11,7 +11,7 @@ version '0.0'
 sourceCompatibility = 1.8
 
 //Main class name
-mainClassName = ''
+mainClassName = 'it.unibo.sc1819.main.MockMain'
 
 //List of variables used in the file.
 ext {
