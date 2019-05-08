@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="HappyVikingBiking.main" target="1.8" />
+      <module name="HappyVikingBiking.test" target="1.8" />
+      <module name="HappyVikingBikingBike.main" target="1.8" />
+      <module name="HappyVikingBikingBike.test" target="1.8" />
+      <module name="HappyVikingBikingRa.main" target="1.8" />
+      <module name="HappyVikingBikingRa.test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
