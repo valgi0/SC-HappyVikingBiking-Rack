@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'scala'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '4.0.1'
 }
 
 group 'it.unibo.sc1819'
@@ -7,10 +10,71 @@ version '0.0'
 
 sourceCompatibility = 1.8
 
+//List of variables used in the file.
+ext {
+    //Scala version variables.
+    scalaBinaryVersion = '2.12'
+    scalaMajor = '2.12'
+    scalaMinorVersion = '6'
+    scalaVersion = "$scalaBinaryVersion.$scalaMinorVersion"
+
+    jUnitVersion = '4.12'
+
+
+    //Version for ScalaTest library.
+    scalaTestVersion = '3.0.1'
+    scalaCheckVersion = '1.14.0'
+
+    //Version for Vertx.
+    vertxVersion = '3.7.0'
+
+    // SLF4J
+    slf4jApiVersion = '1.7.12'
+    logbackVersion = '1.2.3'
+
+}
+
+
 repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()
+}
+
+// this makes the scala classes builds alongside the java ones.
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/scala', 'src/main/java']
+        }
+        java {
+            srcDirs = []
+        }
+    }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    //Support to scala language.
+    implementation "org.scala-lang:scala-library:$scalaVersion"
+
+    //Dependency for Junit.
+    testImplementation "junit:junit:$jUnitVersion"
+
+    // Dependency for ScalaTest.
+    testImplementation "org.scalatest:scalatest_2.12:$scalaTestVersion"
+
+    //Dependencies for ScalaCheck.
+    testImplementation "org.scalacheck:scalacheck_$scalaBinaryVersion:$scalaCheckVersion"
+
+    //Support to Vertx libraries.
+    implementation "io.vertx:vertx-lang-scala_2.12:$vertxVersion"
+    implementation "io.vertx:vertx-web-scala_2.12:$vertxVersion"
+    implementation "io.vertx:vertx-web-client-scala_2.12:$vertxVersion"
+
+    // Simple Logging Facade for Java
+    implementation "org.slf4j:slf4j-api:$slf4jApiVersion"
+    // Logback Classic
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
 }
+
+defaultTasks 'clean', 'build', 'javadoc', 'scaladoc', 'shadowJar'
