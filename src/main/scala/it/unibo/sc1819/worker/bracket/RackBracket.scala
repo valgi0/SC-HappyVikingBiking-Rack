@@ -5,7 +5,6 @@ import com.pi4j.io.gpio.trigger.{GpioSetStateTrigger, GpioSyncStateTrigger}
 import com.pi4j.io.gpio.trigger.GpioCallbackTrigger
 import java.util.concurrent.Callable
 
-import it.unibo.sc1819.test.ButtonLed.MockButtonLedAsyncMain.{BTN_PIN, LED_PIN, SECOND_LED_PIN}
 
 /**
   * A trait to represent a Rack Bracket, a place where to put the bike to be locked.
@@ -55,19 +54,21 @@ object RackBracket {
 
     var isLocked:Boolean = false
     var freeLed:GpioPinDigitalOutput = _
+    var lockingLed: GpioPinDigitalOutput = _
 
     setup()
 
     override def lockBike(): Unit = {
         isLocked = true
-        freeLed.low()
+        freeLed low()
         //TODO NOTIFY THE SERVICE AHEAD OF THE LOCKING
       println("Notification to the context")
     }
 
     override def unlockBike(): Unit = {
       isLocked = false
-      freeLed.high()
+      freeLed high()
+      lockingLed low()
     }
 
     /**
@@ -76,7 +77,7 @@ object RackBracket {
     private def setup(): Unit = {
       val gpioManager = GpioFactory.getInstance
       val sensorButton  = gpioManager.provisionDigitalInputPin(pinConfiguration.presenceSensorPin, PinPullResistance.PULL_DOWN)
-      val lockingLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.lockerActuatorPin,"LockingActuator", PinState.LOW)
+      lockingLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.lockerActuatorPin,"LockingActuator", PinState.LOW)
       freeLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.unlockedBikeFlagPin,"FreeLed", PinState.HIGH)
 
       sensorButton addTrigger new GpioSetStateTrigger(PinState.HIGH, lockingLed, PinState.HIGH)

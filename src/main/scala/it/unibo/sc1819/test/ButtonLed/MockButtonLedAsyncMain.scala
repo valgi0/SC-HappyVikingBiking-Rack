@@ -2,10 +2,11 @@ package it.unibo.sc1819.test.ButtonLed
 
 import com.pi4j.io.gpio.trigger.{GpioSetStateTrigger, GpioSyncStateTrigger}
 import com.pi4j.io.gpio.{GpioFactory, GpioPin, PinPullResistance, PinState, RaspiPin}
+import it.unibo.sc1819.worker.bracket.{PhysicLayerMapper, RackBracket}
 
 object MockButtonLedAsyncMain extends App {
 
-  val SECOND_LED_PIN = RaspiPin.GPIO_23
+ /* val SECOND_LED_PIN = RaspiPin.GPIO_23
   val LED_PIN = RaspiPin.GPIO_24
   val BTN_PIN = RaspiPin.GPIO_25
 
@@ -26,6 +27,13 @@ object MockButtonLedAsyncMain extends App {
 
   while(true) {
 
+  }*/
+
+  val testBracket = RackBracket("1.1.1.1", PhysicLayerMapper(25, 24, 23))
+
+  while(true) {
+    Thread.sleep(5000)
+    testBracket.unlockBike()
   }
 
 }
