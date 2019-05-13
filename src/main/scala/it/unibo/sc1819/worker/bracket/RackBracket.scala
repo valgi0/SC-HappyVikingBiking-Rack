@@ -98,7 +98,7 @@ object RackBracket {
     }
 
     private def sendLockNotification = {
-      eventBus.publish(Topics.WORKER_TOPIC, LockBikeMessage(ipAddress))
+      eventBus.publish(Topics.WORKER_TOPIC, ipAddress)
     }
 
 

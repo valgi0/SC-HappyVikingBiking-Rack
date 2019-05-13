@@ -2,6 +2,8 @@ package it.unibo.sc1819.test.ButtonLed
 
 import com.pi4j.io.gpio.trigger.{GpioSetStateTrigger, GpioSyncStateTrigger}
 import com.pi4j.io.gpio.{GpioFactory, GpioPin, PinPullResistance, PinState, RaspiPin}
+import io.vertx.scala.core.Vertx
+import it.unibo.sc1819.util.messages.{EventBusMessage, LockBikeMessage, Topics}
 import it.unibo.sc1819.worker.bracket.{PhysicLayerMapper, RackBracket}
 
 object MockButtonLedAsyncMain extends App {
@@ -29,7 +31,12 @@ object MockButtonLedAsyncMain extends App {
 
   }*/
 
-  val testBracket = RackBracket("1.1.1.1", PhysicLayerMapper(25, 24, 23))
+  val vertx = Vertx.vertx
+  val testBracket = RackBracket("1.1.1.1", PhysicLayerMapper(25, 24, 23), vertx)
+
+  vertx.eventBus.consumer[String](Topics.WORKER_TOPIC).handler( message => {
+   println(message.body())
+  })
 
   while(true) {
     Thread.sleep(5000)
