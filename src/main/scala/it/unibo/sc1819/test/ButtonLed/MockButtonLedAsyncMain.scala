@@ -5,8 +5,11 @@ import com.pi4j.io.gpio.{GpioFactory, GpioPin, PinPullResistance, PinState, Rasp
 
 object MockButtonLedAsyncMain extends App {
 
-  val LED_PIN = RaspiPin.GPIO_26
-  val BTN_PIN = RaspiPin.GPIO_19
+  val SECOND_LED_PIN = RaspiPin.GPIO_23
+  val LED_PIN = RaspiPin.GPIO_24
+  val BTN_PIN = RaspiPin.GPIO_25
+
+  println(BTN_PIN.getAddress)
 
   val gpioManager = GpioFactory.getInstance
 
@@ -14,6 +17,15 @@ object MockButtonLedAsyncMain extends App {
 
   val led = gpioManager.provisionDigitalOutputPin(LED_PIN,"MockLed", PinState.LOW)
 
+  val freeLed = gpioManager.provisionDigitalOutputPin(SECOND_LED_PIN,"FreeLed", PinState.HIGH)
+
+  button.addTrigger(new GpioSetStateTrigger(PinState.HIGH, freeLed, PinState.LOW))
+  button.addTrigger(new GpioSetStateTrigger(PinState.LOW, freeLed, PinState.HIGH))
+
   button.addTrigger(new GpioSyncStateTrigger(led))
+
+  while(true) {
+
+  }
 
 }
