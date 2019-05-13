@@ -35,6 +35,9 @@ ext {
     slf4jApiVersion = '1.7.12'
     logbackVersion = '1.2.3'
 
+    // PI4J Version
+    pi4jVersion = '1.2'
+
 }
 
 
@@ -78,6 +81,10 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVersion"
     // Logback Classic
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
+
+    // https://mvnrepository.com/artifact/com.pi4j/pi4j-core
+    implementation "com.pi4j:pi4j-core:$pi4jVersion"
+
 }
 
 defaultTasks 'clean', 'build', 'javadoc', 'scaladoc', 'shadowJar'
