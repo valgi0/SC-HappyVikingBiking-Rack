@@ -5,6 +5,9 @@ import com.pi4j.io.gpio.trigger.{GpioSetStateTrigger, GpioSyncStateTrigger}
 import com.pi4j.io.gpio.trigger.GpioCallbackTrigger
 import java.util.concurrent.Callable
 
+import io.vertx.scala.core.Vertx
+import it.unibo.sc1819.util.messages.{LockBikeMessage, Topics}
+
 
 /**
   * A trait to represent a Rack Bracket, a place where to put the bike to be locked.
@@ -47,22 +50,22 @@ object RackBracket {
     * @param physicLayerMapper the configuration to be provided
     * @return a new Bracket object.
     */
-  def apply(ipAddress:String, physicLayerMapper: PhysicLayerMapper): RackBracket =
-    new RackBracketImpl(ipAddress, physicLayerMapper)
+  def apply(ipAddress:String, physicLayerMapper: PhysicLayerMapper, vertxContext:Vertx): RackBracket =
+    new RackBracketImpl(ipAddress, physicLayerMapper, vertxContext)
 
-  private class RackBracketImpl(override val ipAddress:String, val pinConfiguration:PhysicLayerMapper) extends RackBracket {
+  private class RackBracketImpl(override val ipAddress:String, val pinConfiguration:PhysicLayerMapper, val vertxContext:Vertx) extends RackBracket {
 
     var isLocked:Boolean = false
     var freeLed:GpioPinDigitalOutput = _
     var lockingLed: GpioPinDigitalOutput = _
+    val eventBus = vertxContext.eventBus()
 
     setup()
 
     override def lockBike(): Unit = {
         isLocked = true
         freeLed low()
-        //TODO NOTIFY THE SERVICE AHEAD OF THE LOCKING
-      println("Notification to the context")
+        sendLockNotification
     }
 
     override def unlockBike(): Unit = {
@@ -92,6 +95,10 @@ object RackBracket {
       if(!isLocked) {
         lockBike()
       }
+    }
+
+    private def sendLockNotification = {
+      eventBus.publish(Topics.WORKER_TOPIC, LockBikeMessage(ipAddress))
     }
 
 
