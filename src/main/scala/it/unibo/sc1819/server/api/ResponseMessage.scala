@@ -11,4 +11,5 @@ sealed trait JsonResponse
 
 case class Message(message: String) extends JsonResponse
 
+case class BikeIDMessage(bikeID:String) extends JsonResponse
 
