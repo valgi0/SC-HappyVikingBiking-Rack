@@ -9,7 +9,7 @@ object API {
   /**
     * Trait of DiscoveryAPI.
     */
-  trait RestAPI {
+  sealed trait RestAPI {
     /**
       * Path of the RestAPI
       *
@@ -35,12 +35,17 @@ object API {
   }
 
   /**
-    * Trait to define a standard ok and error messages inside the APIs.
+    * Lock Bike API to signal that a bike has been locked.
     */
-  trait APIWithMessages {
-    def okMessage: String
+  case object LockBikeAPI extends RestAPI {
+    override def path: String = "/lockbike"
 
-    def errorMessage: String
+    override def httpMethod: HttpMethod = HttpMethod.POST
+
+    override def asRequest(router: Router, handle: (RoutingContext, RouterResponse) => Unit): Request =
+      POST(router, path, handle)
   }
+
+  //TODO IMPLEMENT API FOR REMOTE UNLOCKING
 
 }
