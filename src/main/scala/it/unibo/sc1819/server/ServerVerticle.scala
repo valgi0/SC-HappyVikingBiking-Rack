@@ -68,7 +68,10 @@ object ServerVerticle {
         .listen(port)
     }
 
-    override def handleMessageLock(bracketLockedIP: String): Unit = bracketQueue += bracketLockedIP
+    override def handleMessageLock(bracketLockedIP: String): Unit = {
+      bracketQueue += bracketLockedIP
+      println(bracketQueue)
+    }
 
 
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
