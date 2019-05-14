@@ -26,6 +26,9 @@ trait WorkerVerticle extends AbstractVerticle {
 
 object WorkerVerticle {
 
+  def apply(vertxContext:Vertx, racketsConfiguration: List[(String, PhysicLayerMapper)]): WorkerVerticle =
+    new WorkerVerticleImpl(racketsConfiguration, vertxContext)
+
   private class WorkerVerticleImpl(val racketsConfiguration: List[(String, PhysicLayerMapper)],
                                    val vertxContext:Vertx) extends WorkerVerticle {
     val bracketList = racketsConfiguration.map(config => RackBracket(config._1, config._2, vertxContext))
