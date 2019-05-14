@@ -58,12 +58,11 @@ object API {
       POST(router, path, handle)
   }
 
-  //TODO IMPLEMENT API FOR REMOTE UNLOCKING
 
   /**
     * Values static method, analog of the Java's enumeration one.
     * @return a set containing all the object extended from RestAPI trait
     */
-  def values:Set[RestAPI] = Set(LockBikeAPI)
+  def values:Set[RestAPI] = Set(LockBikeAPI, UnlockBikeAPI)
 
 }
