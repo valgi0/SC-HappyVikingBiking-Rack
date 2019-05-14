@@ -46,6 +46,24 @@ object API {
       POST(router, path, handle)
   }
 
+  /**
+    * Unlock Bike API to signal that a bike has been locked.
+    */
+  case object UnlockBikeAPI extends RestAPI {
+    override def path: String = "/unlockbike"
+
+    override def httpMethod: HttpMethod = HttpMethod.POST
+
+    override def asRequest(router: Router, handle: (RoutingContext, RouterResponse) => Unit): Request =
+      POST(router, path, handle)
+  }
+
   //TODO IMPLEMENT API FOR REMOTE UNLOCKING
+
+  /**
+    * Values static method, analog of the Java's enumeration one.
+    * @return a set containing all the object extended from RestAPI trait
+    */
+  def values:Set[RestAPI] = Set(LockBikeAPI)
 
 }
