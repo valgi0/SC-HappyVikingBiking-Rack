@@ -1,6 +1,7 @@
 package it.unibo.sc1819.server
 
 import io.vertx.lang.scala.ScalaVerticle
+import io.vertx.scala.core.Vertx
 import io.vertx.scala.ext.web.RoutingContext
 import it.unibo.sc1819.server.api.RouterResponse
 
@@ -29,5 +30,27 @@ trait ServerVerticle extends ScalaVerticle {
     * @param response the response object to send
     */
   def handleRestAPIUnlock(routingContext: RoutingContext, response:RouterResponse)
+}
+
+object ServerVerticle {
+
+  private class ServerVerticleImpl(val vertxContext:Vertx, bracketList: List[String]) extends ServerVerticle {
+
+    val bracketMap = scala.collection.mutable.Map(
+      bracketList.map(ipAddress => {
+        val emptyString:Option[String] = None
+        ipAddress -> emptyString
+      }): _*)
+
+
+
+    override def handleMessageLock(bracketLockedIP: String): Unit = ???
+
+
+    override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = ???
+
+
+    override def handleRestAPIUnlock(routingContext: RoutingContext, response: RouterResponse): Unit = ???
+  }
 
 }
