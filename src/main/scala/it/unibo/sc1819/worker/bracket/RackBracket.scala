@@ -58,7 +58,7 @@ object RackBracket {
     var isLocked:Boolean = false
     var freeLed:GpioPinDigitalOutput = _
     var lockingLed: GpioPinDigitalOutput = _
-    val eventBus = vertxContext.eventBus()
+    val eventBus = vertxContext.eventBus
 
     setup()
 
@@ -98,7 +98,7 @@ object RackBracket {
     }
 
     private def sendLockNotification = {
-      eventBus.publish(Topics.WORKER_TOPIC, ipAddress)
+      eventBus.publish(Topics.LOCK_WORKER_TOPIC, ipAddress)
     }
 
 

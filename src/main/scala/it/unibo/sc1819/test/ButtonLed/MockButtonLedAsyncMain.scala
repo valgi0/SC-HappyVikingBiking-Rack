@@ -34,7 +34,7 @@ object MockButtonLedAsyncMain extends App {
   val vertx = Vertx.vertx
   val testBracket = RackBracket("1.1.1.1", PhysicLayerMapper(25, 24, 23), vertx)
 
-  vertx.eventBus.consumer[String](Topics.WORKER_TOPIC).handler( message => {
+  vertx.eventBus.consumer[String](Topics.LOCK_WORKER_TOPIC).handler(message => {
    println(message.body())
   })
 

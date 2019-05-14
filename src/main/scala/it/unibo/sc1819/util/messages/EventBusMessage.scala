@@ -15,8 +15,10 @@ case class LockBikeMessage(sourceIpAddress: String) extends EventBusMessage
 
 /**
   * Object that will contain all the topics inside the rack.
+  * The name of the channel is the name of the component which will receive the message.
   */
 object Topics {
-  val WORKER_TOPIC = "worker"
-
+  val LOCK_WORKER_TOPIC = "lock_worker"
+  val LOCK_SERVER_TOPIC = "lock_server"
+  val UNLOCK_WORKER_TOPIC = "unlock_WORKER"
 }
