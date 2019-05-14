@@ -40,6 +40,9 @@ trait ServerVerticle extends ScalaVerticle {
 
 object ServerVerticle {
 
+  def apply(vertx: Vertx, bracketList:List[String], remoteServerIP:String, port:Int): ServerVerticle =
+    new ServerVerticleImpl(vertx, bracketList, remoteServerIP, port)
+
   private class ServerVerticleImpl(val vertxContext:Vertx, bracketList: List[String],
                                    val remoteServerIP:String, val port:Int) extends ServerVerticle {
 
