@@ -2,12 +2,14 @@ package it.unibo.sc1819.server
 
 import io.vertx.lang.scala.ScalaVerticle
 import io.vertx.scala.core.Vertx
+import io.vertx.scala.core.http.HttpServerOptions
 import io.vertx.scala.ext.web.{Router, RoutingContext}
-import it.unibo.sc1819.server.api.API.LockBikeAPI
-import it.unibo.sc1819.server.api.{API, BikeIDMessage, RouterResponse}
+import it.unibo.sc1819.server.api.API.{LockBikeAPI, MockBikeAPI}
+import it.unibo.sc1819.server.api.{API, BikeIDMessage, Message, RouterResponse}
 import it.unibo.sc1819.util.messages.Topics
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.read
+import org.json4s.scalap.Error
 
 import scala.collection.mutable
 
@@ -60,10 +62,15 @@ object ServerVerticle {
       val router = Router.router(vertxContext)
       API.values.map({
         case api@LockBikeAPI => api.asRequest(router, handleRestAPILock)
+        case api@MockBikeAPI => api.asRequest(router, mockAPIHandler)
         case _ => println("API IGNORATA")
         })
 
-      vertxContext.createHttpServer()
+      val options = HttpServerOptions()
+      options.setCompressionSupported(true)
+        .setIdleTimeout(10000)
+
+      vertxContext.createHttpServer(options)
         .requestHandler(router.accept _)
         .listen(port)
     }
@@ -77,15 +84,23 @@ object ServerVerticle {
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
       implicit val formats: DefaultFormats.type = DefaultFormats
+      println(routingContext.getBody())
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
-        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
-        case None => println("ERRORE GRAVISSIMO")
+        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID); response.sendResponse(Message("Tutto ok"))
+        case None => println("ERRORE GRAVISSIMO: IP della richiesta era: " + ipAddress);
+          response.setGenericError(Some("Errorissimo")).sendResponse(Message("Errorissimo"))
       }
     }
 
 
     override def handleRestAPIUnlock(routingContext: RoutingContext, response: RouterResponse): Unit = ???
+
+    def mockAPIHandler(routingContext: RoutingContext, response: RouterResponse) = {
+      println("API MOCK CHIAMATA")
+      val bikeID = "popot8"
+      response.sendResponse(BikeIDMessage(bikeID))
+    }
 
     /**
       * Remove the bike from the queue and notify the remote server.
