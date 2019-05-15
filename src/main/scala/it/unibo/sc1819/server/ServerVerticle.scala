@@ -84,19 +84,27 @@ object ServerVerticle {
 
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
-
-      println(routingContext.getBody())
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
         case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
           response.sendResponse(Message("Tutto ok"))
-        case None =>
+        case None => errorHandler(response, "No Bike found")
 
       }
     }
 
 
-    override def handleRestAPIUnlock(routingContext: RoutingContext, response: RouterResponse): Unit = ???
+    override def handleRestAPIUnlock(routingContext: RoutingContext, response: RouterResponse): Unit = {
+      val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
+      bracketMap find (_._2.contains(bikeID)) match {
+        case Some(bracketEntry) => sendUnlockMessage(bracketEntry._1)
+        case _ => errorHandler(response,"BIKE IS NOT PRESENT INSIDE THE RACK")
+      }
+    }
+
+    private def sendUnlockMessage(brackToUnlock:String) = {
+      eventBus.publish(Topics.UNLOCK_WORKER_TOPIC, brackToUnlock)
+    }
 
     private def errorHandler(response:RouterResponse, message:String) =
       response.setGenericError(Some(message))
@@ -114,7 +122,7 @@ object ServerVerticle {
 
     /**
       * Notify the remote server that a bike has been locked
-      * @param bikeID
+      * @param bikeID the bike id to be notified to remote server of lock
       * @return
       */
     private def notifyRemoteServerLock(bikeID:String) = {
