@@ -1,6 +1,7 @@
 package it.unibo.sc1819.worker
 
 import io.vertx.core.AbstractVerticle
+import io.vertx.lang.scala.ScalaVerticle
 import io.vertx.scala.core.Vertx
 import it.unibo.sc1819.util.messages.Topics
 import it.unibo.sc1819.worker.bracket.{PhysicLayerMapper, RackBracket}
@@ -9,7 +10,7 @@ import it.unibo.sc1819.worker.bracket.{PhysicLayerMapper, RackBracket}
   * This Verticle is the main component of the Low level implementation of the rack
   * Receive message from both the server and the brackets and handle the communication between them
   */
-trait WorkerVerticle extends AbstractVerticle {
+trait WorkerVerticle extends ScalaVerticle {
 
   /**
     * Define the actions to be performed when a bracket is locked.

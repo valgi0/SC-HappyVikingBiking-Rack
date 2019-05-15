@@ -9,7 +9,7 @@ object API {
   /**
     * Trait of DiscoveryAPI.
     */
-  trait RestAPI {
+  sealed trait RestAPI {
     /**
       * Path of the RestAPI
       *
@@ -35,12 +35,34 @@ object API {
   }
 
   /**
-    * Trait to define a standard ok and error messages inside the APIs.
+    * Lock Bike API to signal that a bike has been locked.
     */
-  trait APIWithMessages {
-    def okMessage: String
+  case object LockBikeAPI extends RestAPI {
+    override def path: String = "/lockbike"
 
-    def errorMessage: String
+    override def httpMethod: HttpMethod = HttpMethod.POST
+
+    override def asRequest(router: Router, handle: (RoutingContext, RouterResponse) => Unit): Request =
+      POST(router, path, handle)
   }
+
+  /**
+    * Unlock Bike API to signal that a bike has been locked.
+    */
+  case object UnlockBikeAPI extends RestAPI {
+    override def path: String = "/unlockbike"
+
+    override def httpMethod: HttpMethod = HttpMethod.POST
+
+    override def asRequest(router: Router, handle: (RoutingContext, RouterResponse) => Unit): Request =
+      POST(router, path, handle)
+  }
+
+
+  /**
+    * Values static method, analog of the Java's enumeration one.
+    * @return a set containing all the object extended from RestAPI trait
+    */
+  def values:Set[RestAPI] = Set(LockBikeAPI, UnlockBikeAPI)
 
 }

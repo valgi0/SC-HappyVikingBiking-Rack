@@ -60,12 +60,8 @@ case class POST(override val router: Router,
   override val method = HttpMethod.POST
 
   override def handler(): Unit = {
-    router.post(url).produces("application/json").handler(routingContext => {
-      routingContext.request().setExpectMultipart(true)
-      routingContext.request().endHandler(_ =>{
-        val res = RouterResponse(routingContext)
-        handle(routingContext, res)
-      })
+    router.post(url).handler(routingContext => {
+      handle(routingContext, RouterResponse(routingContext))
     })
   }
 
@@ -77,6 +73,7 @@ object ResponseStatus {
 
   val OK_CODE: Int = 200
   val EXCEPTION_CODE: Int = 409
+  val NOT_FOUND_CODE:Int = 404
 
   sealed trait HeaderStatus
 
@@ -84,13 +81,15 @@ object ResponseStatus {
 
   case object ResponseException extends HeaderStatus
 
+  case object NotFound extends HeaderStatus
+
 
   /**
     * This method is used to get all the available seeds
     *
     * @return a Iterable containing all the available seeds.
     */
-  def values: Iterable[HeaderStatus] = Iterable(OK, ResponseException)
+  def values: Iterable[HeaderStatus] = Iterable(OK, ResponseException, NotFound)
 
 }
 

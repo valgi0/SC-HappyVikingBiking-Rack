@@ -11,7 +11,7 @@ version '0.1.0'
 sourceCompatibility = 1.8
 
 //Main class name
-mainClassName = 'it.unibo.sc1819.test.ButtonLed.MockButtonLedAsyncMain'
+mainClassName = 'it.unibo.sc1819.main.MockScalaMain'
 
 //List of variables used in the file.
 ext {
