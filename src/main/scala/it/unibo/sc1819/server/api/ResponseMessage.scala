@@ -7,9 +7,16 @@ package it.unibo.sc1819.server.api
   *
   */
 
-sealed trait JsonResponse
+object ResponseMessage {
 
-case class Message(message: String) extends JsonResponse
+  sealed trait JsonResponse
 
-case class BikeIDMessage(bikeID:String) extends JsonResponse
+  case class Message(message: String) extends JsonResponse
+
+  case class BikeIDMessage(bikeID:String) extends JsonResponse
+
+  case class Error(cause: Option[String] = None) extends JsonResponse
+}
+
+
 

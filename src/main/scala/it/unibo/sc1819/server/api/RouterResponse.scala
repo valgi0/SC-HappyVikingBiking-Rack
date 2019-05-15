@@ -2,6 +2,7 @@
 package it.unibo.sc1819.server.api
 
 import io.vertx.scala.ext.web.RoutingContext
+import it.unibo.sc1819.server.api.ResponseMessage.JsonResponse
 import it.unibo.sc1819.server.api.ResponseStatus.{HeaderStatus, OK, ResponseException}
 import org.json4s.DefaultFormats
 import org.json4s.scalap.Error

@@ -1,18 +1,16 @@
 package it.unibo.sc1819.server
 
-import io.vertx.core.http.HttpMethod
-import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.ScalaVerticle
 import io.vertx.scala.core.Vertx
 import io.vertx.scala.core.http.HttpServerOptions
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Router, RoutingContext}
 import it.unibo.sc1819.server.api.API.{LockBikeAPI, MockBikeAPI}
-import it.unibo.sc1819.server.api.{API, BikeIDMessage, Message, RouterResponse}
+import it.unibo.sc1819.server.api.ResponseMessage.{BikeIDMessage, Error, Message}
+import it.unibo.sc1819.server.api.{API, RouterResponse}
 import it.unibo.sc1819.util.messages.Topics
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.read
-import org.json4s.scalap.Error
 
 import scala.collection.mutable
 
@@ -58,6 +56,7 @@ object ServerVerticle {
       }): _*)
     val bracketQueue: mutable.Queue[String] = mutable.Queue()
     val eventBus = vertxContext.eventBus
+    implicit val formats: DefaultFormats.type = DefaultFormats
 
     override def start(): Unit = {
       eventBus.consumer[String](Topics.LOCK_SERVER_TOPIC).handler(message => handleMessageLock(message.body()))
@@ -66,7 +65,6 @@ object ServerVerticle {
       router.route.handler(BodyHandler.create())
       API.values.map({
         case api@LockBikeAPI => api.asRequest(router, handleRestAPILock)
-        case api@MockBikeAPI => api.asRequest(router, mockAPIHandler)
         case _ => println("API IGNORATA")
         })
 
@@ -84,41 +82,25 @@ object ServerVerticle {
       println(bracketQueue)
     }
 
-    def handleRestAPILock(routingContext: RoutingContext): Unit = {
-      val ipAddress = routingContext.request().remoteAddress().host()
-      implicit val formats: DefaultFormats.type = DefaultFormats
-      println(routingContext.getBody())
-      val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
-      println("BikeID: " + bikeID)
-      println("ipAddress: " + ipAddress)
-      routingContext.response
-      .putHeader("content-type", "application/json")
-      // Write to the response and end it
-      .end("{\"status\": 200}")
-
-    }
-
-
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
-      implicit val formats: DefaultFormats.type = DefaultFormats
+
       println(routingContext.getBody())
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
-        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID); response.sendResponse(Message("Tutto ok"))
-        case None => println("ERRORE GRAVISSIMO: IP della richiesta era: " + ipAddress)
-          response.setGenericError(Some("Errorissimo")).sendResponse(Message("Errorissimo"))
+        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
+          response.sendResponse(Message("Tutto ok"))
+        case None =>
+
       }
     }
 
 
     override def handleRestAPIUnlock(routingContext: RoutingContext, response: RouterResponse): Unit = ???
 
-    def mockAPIHandler(routingContext: RoutingContext, response: RouterResponse) = {
-      println("API MOCK CHIAMATA")
-      val bikeID = "popot8"
-      response.sendResponse(BikeIDMessage(bikeID))
-    }
+    private def errorHandler(response:RouterResponse, message:String) =
+      response.setGenericError(Some(message))
+        .sendResponse(Error())
 
     /**
       * Remove the bike from the queue and notify the remote server.
