@@ -5,9 +5,9 @@ import io.vertx.scala.core.Vertx
 import io.vertx.scala.core.http.HttpServerOptions
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Router, RoutingContext}
-import it.unibo.sc1819.server.api.API.{LockBikeAPI, MockBikeAPI}
+import it.unibo.sc1819.server.api.API.{LockBikeAPI,UnlockBikeAPI}
 import it.unibo.sc1819.server.api.ResponseMessage.{BikeIDMessage, Error, Message}
-import it.unibo.sc1819.server.api.{API, RouterResponse}
+import it.unibo.sc1819.server.api.{API, ResponseStatus, RouterResponse}
 import it.unibo.sc1819.util.messages.Topics
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.read
@@ -65,6 +65,7 @@ object ServerVerticle {
       router.route.handler(BodyHandler.create())
       API.values.map({
         case api@LockBikeAPI => api.asRequest(router, handleRestAPILock)
+        case api@UnlockBikeAPI => api.asRequest(router, handleRestAPIUnlock)
         case _ => println("API IGNORATA")
         })
 
@@ -98,6 +99,7 @@ object ServerVerticle {
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
       bracketMap find (_._2.contains(bikeID)) match {
         case Some(bracketEntry) => sendUnlockMessage(bracketEntry._1)
+          response.sendResponse(Message("Tutto ok"))
         case _ => errorHandler(response,"BIKE IS NOT PRESENT INSIDE THE RACK")
       }
     }
@@ -107,7 +109,7 @@ object ServerVerticle {
     }
 
     private def errorHandler(response:RouterResponse, message:String) =
-      response.setGenericError(Some(message))
+      response.setError(ResponseStatus.NotFound, Some(message))
         .sendResponse(Error())
 
     /**

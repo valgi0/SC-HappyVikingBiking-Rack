@@ -58,20 +58,11 @@ object API {
       POST(router, path, handle)
   }
 
-  case object MockBikeAPI extends RestAPI {
-    override def path: String = "/mockbike"
-
-    override def httpMethod: HttpMethod = HttpMethod.POST
-
-    override def asRequest(router: Router, handle: (RoutingContext, RouterResponse) => Unit): Request =
-      POST(router, path, handle)
-  }
-
 
   /**
     * Values static method, analog of the Java's enumeration one.
     * @return a set containing all the object extended from RestAPI trait
     */
-  def values:Set[RestAPI] = Set(LockBikeAPI, UnlockBikeAPI, MockBikeAPI)
+  def values:Set[RestAPI] = Set(LockBikeAPI, UnlockBikeAPI)
 
 }
