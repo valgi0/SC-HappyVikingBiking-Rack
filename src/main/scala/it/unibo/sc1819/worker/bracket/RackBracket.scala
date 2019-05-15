@@ -105,7 +105,7 @@ object RackBracket {
   }
 
   /**
-    * Implict to convert a integer to a GPIO pin.
+    * Implicit to convert a integer to a GPIO pin.
     * @param pinToConvert the integer to convert to a pin
     * @return a GPIO object of the specified pin
     */

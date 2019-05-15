@@ -1,8 +1,11 @@
 package it.unibo.sc1819.server
 
+import io.vertx.core.http.HttpMethod
+import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.ScalaVerticle
 import io.vertx.scala.core.Vertx
 import io.vertx.scala.core.http.HttpServerOptions
+import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Router, RoutingContext}
 import it.unibo.sc1819.server.api.API.{LockBikeAPI, MockBikeAPI}
 import it.unibo.sc1819.server.api.{API, BikeIDMessage, Message, RouterResponse}
@@ -60,6 +63,7 @@ object ServerVerticle {
       eventBus.consumer[String](Topics.LOCK_SERVER_TOPIC).handler(message => handleMessageLock(message.body()))
 
       val router = Router.router(vertxContext)
+      router.route.handler(BodyHandler.create())
       API.values.map({
         case api@LockBikeAPI => api.asRequest(router, handleRestAPILock)
         case api@MockBikeAPI => api.asRequest(router, mockAPIHandler)
@@ -80,6 +84,20 @@ object ServerVerticle {
       println(bracketQueue)
     }
 
+    def handleRestAPILock(routingContext: RoutingContext): Unit = {
+      val ipAddress = routingContext.request().remoteAddress().host()
+      implicit val formats: DefaultFormats.type = DefaultFormats
+      println(routingContext.getBody())
+      val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
+      println("BikeID: " + bikeID)
+      println("ipAddress: " + ipAddress)
+      routingContext.response
+      .putHeader("content-type", "application/json")
+      // Write to the response and end it
+      .end("{\"status\": 200}")
+
+    }
+
 
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
@@ -88,7 +106,7 @@ object ServerVerticle {
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
         case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID); response.sendResponse(Message("Tutto ok"))
-        case None => println("ERRORE GRAVISSIMO: IP della richiesta era: " + ipAddress);
+        case None => println("ERRORE GRAVISSIMO: IP della richiesta era: " + ipAddress)
           response.setGenericError(Some("Errorissimo")).sendResponse(Message("Errorissimo"))
       }
     }

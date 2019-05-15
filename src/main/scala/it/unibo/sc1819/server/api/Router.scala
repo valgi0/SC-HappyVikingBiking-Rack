@@ -60,12 +60,8 @@ case class POST(override val router: Router,
   override val method = HttpMethod.POST
 
   override def handler(): Unit = {
-    router.post(url).produces("application/json").handler(routingContext => {
-      routingContext.request().setExpectMultipart(true)
-      routingContext.request().endHandler(_ =>{
-        val res = RouterResponse(routingContext)
-        handle(routingContext, res)
-      })
+    router.post(url).handler(routingContext => {
+      handle(routingContext, RouterResponse(routingContext))
     })
   }
 
