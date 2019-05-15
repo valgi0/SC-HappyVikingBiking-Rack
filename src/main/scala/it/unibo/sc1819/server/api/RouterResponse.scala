@@ -3,7 +3,7 @@ package it.unibo.sc1819.server.api
 
 import io.vertx.scala.ext.web.RoutingContext
 import it.unibo.sc1819.server.api.ResponseMessage.JsonResponse
-import it.unibo.sc1819.server.api.ResponseStatus.{HeaderStatus, OK, ResponseException}
+import it.unibo.sc1819.server.api.ResponseStatus.{HeaderStatus, NotFound, OK, ResponseException}
 import org.json4s.DefaultFormats
 import org.json4s.scalap.Error
 import org.json4s.jackson.Serialization.write
@@ -86,6 +86,13 @@ case class RouterResponse(routingContext: RoutingContext,
       case ResponseException =>
         routingContext.response()
           .setStatusCode(ResponseStatus.EXCEPTION_CODE)
+          .setChunked(true)
+          .putHeader("Content-Type", "application/json")
+          .write(write(Error(message)))
+          .end()
+      case NotFound  =>
+        routingContext.response()
+          .setStatusCode(ResponseStatus.NOT_FOUND_CODE)
           .setChunked(true)
           .putHeader("Content-Type", "application/json")
           .write(write(Error(message)))
