@@ -125,26 +125,31 @@ object ServerVerticle {
       */
     private def confirmCorrectLockAndNotifyServer(ipAddress: String, bikeID:String):Unit = {
       bracketMap.put(ipAddress, Some(bikeID))
-      notifyRemoteServerLock(bikeID, 0)
+      notifyRemoteServerLock(bikeID, bracketList.indexOf(ipAddress), 0)
     }
 
     /**
       * Notify the remote server that a bike has been locked
       * @param bikeID the bike id to be notified to remote server of lock
+      * @param position the position on which the rack is setted
       * @param tries the tires effectuated by the remote api
       */
-    private def notifyRemoteServerLock(bikeID:String, tries:Int):Unit = {
+    private def notifyRemoteServerLock(bikeID:String, position:Int, tries:Int):Unit = {
       val newtries = tries + 1
       if(newtries < web.MAX_TRIES) {
         webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
-          web.handlerToOnlyFailureConversion(_ => notifyRemoteServerLock(bikeID, newtries)), Some(LockBikeAPI(bikeID)))
+          web.handlerToOnlyFailureConversion(_ => notifyRemoteServerLock(bikeID, position,newtries)),
+          Some(LockMessage(rackID, bikeID, position)))
       } else {
         webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
-          web.handlerToOnlyFailureConversion(_ => definitiveErrorHandler()), Some(LockMessage(bikeID, rackID)))
+          web.handlerToOnlyFailureConversion(_ => definitiveErrorHandler()), Some(LockMessage(rackID, bikeID, position)))
       }
 
     }
 
+    /**
+      * Error handler to be called when the for ten or more times the remote server does not respond.
+      */
     private def definitiveErrorHandler():Unit = {
       webClient.executeAPICall(remoteServerIP, HttpMethod.POST, web.ERROR_PATH,remoteServerPort,
         web.handlerToOnlyFailureConversion(_ => {}), Some(ErrorLogMessage(rackID, web.ERROR_LOG_MESSAGE)))

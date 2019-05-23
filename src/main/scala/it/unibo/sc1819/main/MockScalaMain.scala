@@ -15,9 +15,9 @@ object MockScalaMain extends App {
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 
- val serverVerticle = ServerVerticle(vertxContext, racketList, "mockremoteaddress", 8888)
+ //val serverVerticle = ServerVerticle(vertxContext, racketList, "mockremoteaddress", 8888)
 
- vertxContext.deployVerticle(serverVerticle)
+ //vertxContext.deployVerticle(serverVerticle)
 
  vertxContext.deployVerticle(workerVerticle)
 

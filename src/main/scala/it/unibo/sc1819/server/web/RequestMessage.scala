@@ -11,7 +11,7 @@ object RequestMessage {
 
   sealed trait JsonRequest
 
-  case class LockMessage(rackID:String, bikeID:String) extends JsonRequest
+  case class LockMessage(rackID:String, bikeID:String, position:Int) extends JsonRequest
 
   case class ErrorLogMessage(rackID:String, errorMessage:String) extends JsonRequest
 }
