@@ -1,16 +1,20 @@
 package it.unibo.sc1819.server
 
+import io.vertx.core.http.HttpMethod
 import io.vertx.lang.scala.ScalaVerticle
 import io.vertx.scala.core.Vertx
 import io.vertx.scala.core.http.HttpServerOptions
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Router, RoutingContext}
-import it.unibo.sc1819.server.api.API.{LockBikeAPI,UnlockBikeAPI}
+import it.unibo.sc1819.server.api.API.{LockBikeAPI, UnlockBikeAPI}
 import it.unibo.sc1819.server.api.ResponseMessage.{BikeIDMessage, Error, Message}
 import it.unibo.sc1819.server.api.{API, ResponseStatus, RouterResponse}
+import it.unibo.sc1819.server.web.WebClient
 import it.unibo.sc1819.util.messages.Topics
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization.read
+import it.unibo.sc1819.server.web.LOCK_API_PATH
+import it.unibo.sc1819.server.web.RequestMessage.{ErrorLogMessage, LockMessage}
 
 import scala.collection.mutable
 
@@ -43,11 +47,12 @@ trait ServerVerticle extends ScalaVerticle {
 
 object ServerVerticle {
 
-  def apply(vertx: Vertx, bracketList:List[String], remoteServerIP:String, port:Int): ServerVerticle =
-    new ServerVerticleImpl(vertx, bracketList, remoteServerIP, port)
+  def apply(rackID:String, vertx: Vertx, bracketList:List[String], remoteServerIP:String, remoteServerPort:Int, port:Int): ServerVerticle =
+    new ServerVerticleImpl(rackID,vertx, bracketList, remoteServerIP, remoteServerPort, port)
 
-  private class ServerVerticleImpl(val vertxContext:Vertx, bracketList: List[String],
-                                   val remoteServerIP:String, val port:Int) extends ServerVerticle {
+  private class ServerVerticleImpl(val rackID:String, val vertxContext:Vertx, bracketList: List[String],
+                                   val remoteServerIP:String,val remoteServerPort:Int,
+                                   val port:Int) extends ServerVerticle {
 
     val bracketMap = scala.collection.mutable.Map(
       bracketList.map(ipAddress => {
@@ -56,6 +61,7 @@ object ServerVerticle {
       }): _*)
     val bracketQueue: mutable.Queue[String] = mutable.Queue()
     val eventBus = vertxContext.eventBus
+    val webClient = WebClient(vertxContext)
     implicit val formats: DefaultFormats.type = DefaultFormats
 
     override def start(): Unit = {
@@ -119,17 +125,30 @@ object ServerVerticle {
       */
     private def confirmCorrectLockAndNotifyServer(ipAddress: String, bikeID:String):Unit = {
       bracketMap.put(ipAddress, Some(bikeID))
-      notifyRemoteServerLock(bikeID)
+      notifyRemoteServerLock(bikeID, 0)
     }
 
     /**
       * Notify the remote server that a bike has been locked
       * @param bikeID the bike id to be notified to remote server of lock
-      * @return
+      * @param tries the tires effectuated by the remote api
       */
-    private def notifyRemoteServerLock(bikeID:String) = {
-      println("Biciletta è registrata tramite chiamata, contatto il server")
-    }//TODO complete this
+    private def notifyRemoteServerLock(bikeID:String, tries:Int):Unit = {
+      val newtries = tries + 1
+      if(newtries < web.MAX_TRIES) {
+        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+          web.handlerToOnlyFailureConversion(_ => notifyRemoteServerLock(bikeID, newtries)), Some(LockBikeAPI(bikeID)))
+      } else {
+        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+          web.handlerToOnlyFailureConversion(_ => definitiveErrorHandler()), Some(LockMessage(bikeID, rackID)))
+      }
+
+    }
+
+    private def definitiveErrorHandler():Unit = {
+      webClient.executeAPICall(remoteServerIP, HttpMethod.POST, web.ERROR_PATH,remoteServerPort,
+        web.handlerToOnlyFailureConversion(_ => {}), Some(ErrorLogMessage(rackID, web.ERROR_LOG_MESSAGE)))
+    }
   }
 
 
