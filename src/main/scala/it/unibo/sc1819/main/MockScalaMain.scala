@@ -1,7 +1,6 @@
 package it.unibo.sc1819.main
 
 import io.vertx.scala.core.Vertx
-import io.vertx.scala.core.http.HttpServerOptions
 import it.unibo.sc1819.server.ServerVerticle
 import it.unibo.sc1819.worker.WorkerVerticle
 import it.unibo.sc1819.worker.bracket.PhysicLayerMapper
@@ -15,7 +14,7 @@ object MockScalaMain extends App {
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 
- val serverVerticle = ServerVerticle("MOCK RACK",vertxContext, racketList, "loaclhost", 8080, 8888)
+ val serverVerticle = ServerVerticle("MOCK RACK",vertxContext, racketList, "localhost", 8080, 8888)
 
  vertxContext.deployVerticle(serverVerticle)
 
