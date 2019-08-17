@@ -8,7 +8,7 @@ import it.unibo.sc1819.worker.bracket.PhysicLayerMapper
 object MockScalaMain extends App {
 
  val vertxContext = Vertx.vertx
- val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(25, 24, 23)))
+ val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(6, 5, 4)))
  val racketList = List("192.168.1.155")
 
 
