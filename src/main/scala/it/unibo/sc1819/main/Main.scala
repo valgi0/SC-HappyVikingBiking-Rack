@@ -5,7 +5,7 @@ import it.unibo.sc1819.server.ServerVerticle
 import it.unibo.sc1819.worker.WorkerVerticle
 import it.unibo.sc1819.worker.bracket.PhysicLayerMapper
 
-object MockScalaMain extends App {
+object Main extends App {
 
  val vertxContext = Vertx.vertx
  val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(6, 5, 4)))

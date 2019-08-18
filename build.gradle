@@ -11,7 +11,7 @@ version '0.2.0'
 sourceCompatibility = 1.8
 
 //Main class name
-mainClassName = 'it.unibo.sc1819.main.MockScalaMain'
+mainClassName = 'it.unibo.sc1819.main.Main'
 
 //List of variables used in the file.
 ext {
