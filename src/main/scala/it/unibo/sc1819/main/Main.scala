@@ -8,6 +8,7 @@ import org.rogach.scallop.{ScallopConf, ScallopOption}
 
 class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
  val remoteaddress: ScallopOption[String] = opt[String]()
+ val rackname: ScallopOption[String] = opt[String]()
  val remoteport: ScallopOption[Int] = opt[Int]()
  val serveraddress: ScallopOption[String] = opt[String]()
  val serverport: ScallopOption[Int] = opt[Int]()
@@ -23,12 +24,14 @@ object Main extends App {
  var serveraddress = DEFAULT_RACK_SERVER_IP
  var serverport = DEFAULT_RACK_SERVER_PORT
  var ip_brackets_pinlist = DEFAULT_IP_BRACKET_CONF
+ var rackname = DEFAULT_RACK_NAME
 
  if (conf.remoteaddress.supplied) remoteaddress = conf.remoteaddress()
  if (conf.remoteport.supplied) remoteport = conf.remoteport()
  if (conf.serveraddress.supplied) serveraddress = conf.serveraddress()
  if (conf.serverport.supplied) serverport = conf.serverport()
  if (conf.ip_brackets_pinlist.supplied) ip_brackets_pinlist = conf.ip_brackets_pinlist()
+ if (conf.rackname.supplied) rackname = conf.rackname()
 
  val racketsConfiguration = ip_brackets_pinlist.split(DEFAULT_BRACKETS_SEPARATOR)
    .map(entry => {
@@ -41,8 +44,6 @@ object Main extends App {
    .map(_.split(DEFAULT_IP_BRACKET_SEP)(0)).toList
 
 
-
-
  val vertxContext = Vertx.vertx
  //val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(6, 5, 4)))
  //val racketList = List("192.168.1.155")
@@ -50,7 +51,7 @@ object Main extends App {
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 
- val serverVerticle = ServerVerticle("MOCK RACK",vertxContext, racketList, "localhost", 8080, 8888)
+ val serverVerticle = ServerVerticle(rackname,vertxContext, racketList, remoteaddress, remoteport, serverport)
 
  vertxContext.deployVerticle(serverVerticle)
 
