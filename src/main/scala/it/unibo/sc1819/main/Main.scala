@@ -51,6 +51,7 @@ object Main extends App {
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 
+
  val serverVerticle = ServerVerticle(rackname,vertxContext, racketList, remoteaddress, remoteport, serverport)
 
  vertxContext.deployVerticle(serverVerticle)
