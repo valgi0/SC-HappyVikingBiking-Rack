@@ -6,12 +6,12 @@ plugins {
 }
 
 group 'it.unibo.sc1819'
-version '0.2.0'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 
 //Main class name
-mainClassName = 'it.unibo.sc1819.main.MockScalaMain'
+mainClassName = 'it.unibo.sc1819.main.Main'
 
 //List of variables used in the file.
 ext {
@@ -88,6 +88,9 @@ dependencies {
     // JSON4S Json Library
     compile group: 'org.json4s', name: 'json4s-native_2.12', version: '3.6.0'
     compile group: 'org.json4s', name: 'json4s-jackson_2.12', version: '3.6.0'
+
+    // Add cli parser support.
+    implementation 'org.rogach:scallop_2.12:3.1.3'
 
 }
 
