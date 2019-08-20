@@ -13,6 +13,8 @@ package object main {
 
   val DEFAULT_IP_BRACKET_CONF = "192.168.1.154:6,5,4;"
 
+  val DEFAULT_BIKE_ID = "1"
+
   val DEFAULT_BRACKETS_SEPARATOR = ";"
   val DEFAULT_IP_BRACKET_SEP = ":"
   val DEFAULT_PIN_SEPARATOR = ","

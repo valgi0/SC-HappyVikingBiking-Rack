@@ -39,15 +39,24 @@ object WebClient {
 
     override def executeAPICall(remoteServer: String, method: HttpMethod, remotePath: String, port: Int,
                                 handler: AsyncResult[HttpResponse[Buffer]] => Unit,
-                                body: Option[JsonRequest] = None): Unit =
+                                body: Option[JsonRequest] = None): Unit = {
+      println("API ESEFUITA")
       method match  {
         case HttpMethod.GET => client.get(port, remoteServer, remotePath).send(handler(_))
         case HttpMethod.POST if body.isDefined => client.post(port, remoteServer, remotePath)
           .putHeader("Content-Type", "application/json")
           .sendBuffer(body.get, handler(_))
         case HttpMethod.POST => client.post(port, remoteServer, remotePath).send(handler(_))
+        case HttpMethod.PUT if body.isDefined => {
+          println("Parte CHIAMATA PUT a " + remoteServer + ":" + port + "/" + remotePath)
+          client.put(port, remoteServer, remotePath)
+            .putHeader("Content-Type", "application/json")
+            .sendBuffer(body.get, handler(_))
+        }
         case _ =>
       }
+    }
+
   }
 
   /**

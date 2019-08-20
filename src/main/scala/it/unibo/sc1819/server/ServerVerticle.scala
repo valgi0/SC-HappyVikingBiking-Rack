@@ -92,6 +92,7 @@ object ServerVerticle {
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
+      println("IP DELLA RICHIESTA E: " + ipAddress)
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
         case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
           response.sendResponse(Message("Tutto ok"))
@@ -125,6 +126,7 @@ object ServerVerticle {
       */
     private def confirmCorrectLockAndNotifyServer(ipAddress: String, bikeID:String):Unit = {
       bracketMap.put(ipAddress, Some(bikeID))
+      println(bracketMap.toList)
       notifyRemoteServerLock(bikeID, bracketList.indexOf(ipAddress), 0)
     }
 
@@ -137,11 +139,11 @@ object ServerVerticle {
     private def notifyRemoteServerLock(bikeID:String, position:Int, tries:Int):Unit = {
       val newtries = tries + 1
       if(newtries < web.MAX_TRIES) {
-        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+        webClient.executeAPICall(remoteServerIP, HttpMethod.PUT, LOCK_API_PATH,remoteServerPort,
           web.handlerToOnlyFailureConversion(_ => notifyRemoteServerLock(bikeID, position,newtries)),
           Some(LockMessage(rackID, bikeID, position)))
       } else {
-        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+        webClient.executeAPICall(remoteServerIP, HttpMethod.PUT, LOCK_API_PATH,remoteServerPort,
           web.handlerToOnlyFailureConversion(_ => definitiveErrorHandler()), Some(LockMessage(rackID, bikeID, position)))
       }
 

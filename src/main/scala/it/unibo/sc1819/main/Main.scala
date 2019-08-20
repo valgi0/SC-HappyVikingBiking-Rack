@@ -2,6 +2,7 @@ package it.unibo.sc1819.main
 
 import io.vertx.scala.core.Vertx
 import it.unibo.sc1819.server.ServerVerticle
+import it.unibo.sc1819.util.messages.Topics
 import it.unibo.sc1819.worker.WorkerVerticle
 import it.unibo.sc1819.worker.bracket.PhysicLayerMapper
 import org.rogach.scallop.{ScallopConf, ScallopOption}
@@ -57,5 +58,7 @@ object Main extends App {
  vertxContext.deployVerticle(serverVerticle)
 
  vertxContext.deployVerticle(workerVerticle)
+
+ vertxContext.eventBus.publish(Topics.LOCK_SERVER_TOPIC, "")
 
 }
