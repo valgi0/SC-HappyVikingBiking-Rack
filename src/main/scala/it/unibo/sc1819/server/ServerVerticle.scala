@@ -47,18 +47,16 @@ trait ServerVerticle extends ScalaVerticle {
 
 object ServerVerticle {
 
-  def apply(rackID:String, vertx: Vertx, bracketList:List[String], remoteServerIP:String, remoteServerPort:Int, port:Int): ServerVerticle =
+  def apply(rackID:String, vertx: Vertx, bracketList:List[(String, Option[String])], remoteServerIP:String, remoteServerPort:Int, port:Int): ServerVerticle =
     new ServerVerticleImpl(rackID,vertx, bracketList, remoteServerIP, remoteServerPort, port)
 
-  private class ServerVerticleImpl(val rackID:String, val vertxContext:Vertx, bracketList: List[String],
+  private class ServerVerticleImpl(val rackID:String, val vertxContext:Vertx, bracketList: List[(String, Option[String])],
                                    val remoteServerIP:String,val remoteServerPort:Int,
                                    val port:Int) extends ServerVerticle {
 
     val bracketMap = scala.collection.mutable.Map(
-      bracketList.map(ipAddress => {
-        val emptyString:Option[String] = None
-        ipAddress -> emptyString
-      }): _*)
+      bracketList.map(entry => {
+        entry._1 -> entry._2}): _*)
     val bracketQueue: mutable.Queue[String] = mutable.Queue()
     val eventBus = vertxContext.eventBus
     val webClient = WebClient(vertxContext)
@@ -92,7 +90,6 @@ object ServerVerticle {
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
-      println("IP DELLA RICHIESTA E: " + ipAddress)
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
         case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
           response.sendResponse(Message("Tutto ok"))
@@ -126,7 +123,6 @@ object ServerVerticle {
       */
     private def confirmCorrectLockAndNotifyServer(ipAddress: String, bikeID:String):Unit = {
       bracketMap.put(ipAddress, Some(bikeID))
-      println(bracketMap.toList)
       notifyRemoteServerLock(bikeID, bracketList.indexOf(ipAddress), 0)
     }
 

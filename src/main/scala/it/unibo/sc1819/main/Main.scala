@@ -2,7 +2,6 @@ package it.unibo.sc1819.main
 
 import io.vertx.scala.core.Vertx
 import it.unibo.sc1819.server.ServerVerticle
-import it.unibo.sc1819.util.messages.Topics
 import it.unibo.sc1819.worker.WorkerVerticle
 import it.unibo.sc1819.worker.bracket.PhysicLayerMapper
 import org.rogach.scallop.{ScallopConf, ScallopOption}
@@ -42,13 +41,16 @@ object Main extends App {
    }).toList
 
  val racketList = ip_brackets_pinlist.split(DEFAULT_BRACKETS_SEPARATOR)
-   .map(_.split(DEFAULT_IP_BRACKET_SEP)(0)).toList
+   .map(entry => {
+    var optionalBikeID:Option[String] = None
+    if(entry.split(DEFAULT_IP_BRACKET_SEP).length > 2) {
+     optionalBikeID = Some(entry.split(DEFAULT_IP_BRACKET_SEP)(2))
+    }
+    (entry.split(DEFAULT_IP_BRACKET_SEP)(0), optionalBikeID)
+   }).toList
 
 
  val vertxContext = Vertx.vertx
- //val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(6, 5, 4)))
- //val racketList = List("192.168.1.155")
-
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 
@@ -58,7 +60,5 @@ object Main extends App {
  vertxContext.deployVerticle(serverVerticle)
 
  vertxContext.deployVerticle(workerVerticle)
-
- vertxContext.eventBus.publish(Topics.LOCK_SERVER_TOPIC, "")
 
 }
