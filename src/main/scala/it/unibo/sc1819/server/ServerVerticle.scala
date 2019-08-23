@@ -89,7 +89,10 @@ object ServerVerticle {
 
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
+      println("IP Address = " + ipAddress)
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
+      println("Bike ID: " + bikeID)
+      println(bracketQueue.contains(ipAddress))
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
         case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
           response.sendResponse(Message("Tutto ok"))

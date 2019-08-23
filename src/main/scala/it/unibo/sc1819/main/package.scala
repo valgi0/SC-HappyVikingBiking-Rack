@@ -21,6 +21,6 @@ package object main {
   val DEFAULT_IP_BRACKET_SEP = ":"
   val DEFAULT_PIN_SEPARATOR = ","
 
-  val DEFAULT_RACK_NAME = "MOCK-RACK"
+  val DEFAULT_RACK_NAME = "piazza_saffi"
 
 }
