@@ -94,8 +94,9 @@ object ServerVerticle {
       println("Bike ID: " + bikeID)
       println(bracketQueue.contains(ipAddress))
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
-        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
-          response.sendResponse(Message("Tutto ok"))
+        case Some(element) => { confirmCorrectLockAndNotifyServer(element, bikeID)
+          println("Conferma finita, invio risposta")
+          response.sendResponse(Message("Tutto ok")) }
         case None => errorHandler(response, "No Bike found")
 
       }
