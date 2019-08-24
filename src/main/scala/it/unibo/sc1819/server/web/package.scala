@@ -8,8 +8,9 @@ package object web {
 
   val OK_CODE = 200
 
-  val LOCK_API_PATH = "/lockbike"
-  val ERROR_PATH = "/rackerror"
+  val LOCK_API_PATH = "/api/delivebike"
+  //TODO  INSERT A LOG
+  val ERROR_PATH = "/api/rackerror"
   val MAX_TRIES = 10
   val ERROR_LOG_MESSAGE = "COULD NOT COMMUNICATE WITH THE REMOTE SERVER FOR " + MAX_TRIES +
     "TIMES, NOW IN ERROR STATE"
@@ -38,9 +39,13 @@ package object web {
   AsyncResult[HttpResponse[Buffer]] => Unit = ar => {
     if(ar.succeeded()) {
       if(ar.result().statusCode() != OK_CODE) {
+        println(ar.result().statusCode())
+        println(ar.result().bodyAsString)
         onFailure(ar.result().bodyAsString())
       }
     } else {
+      println(ar.result().statusCode())
+      println(ar.result().bodyAsString)
       onFailure(Some(ar.cause().getMessage))
     }
   }

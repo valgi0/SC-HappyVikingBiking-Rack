@@ -50,12 +50,13 @@ object RackBracket {
     * @param physicLayerMapper the configuration to be provided
     * @return a new Bracket object.
     */
-  def apply(ipAddress:String, physicLayerMapper: PhysicLayerMapper, vertxContext:Vertx): RackBracket =
-    new RackBracketImpl(ipAddress, physicLayerMapper, vertxContext)
+  def apply(ipAddress:String, physicLayerMapper: PhysicLayerMapper, optionalBikeID:Option[String], vertxContext:Vertx): RackBracket =
+    new RackBracketImpl(ipAddress, physicLayerMapper, optionalBikeID, vertxContext)
 
-  private class RackBracketImpl(override val ipAddress:String, val pinConfiguration:PhysicLayerMapper, val vertxContext:Vertx) extends RackBracket {
+  private class RackBracketImpl(override val ipAddress:String, val pinConfiguration:PhysicLayerMapper,
+                                optionalBikeID:Option[String],val vertxContext:Vertx) extends RackBracket {
 
-    var isLocked:Boolean = false
+    var isLocked:Boolean = optionalBikeID.isDefined
     var freeLed:GpioPinDigitalOutput = _
     var lockingLed: GpioPinDigitalOutput = _
     val eventBus = vertxContext.eventBus
@@ -80,13 +81,20 @@ object RackBracket {
     private def setup(): Unit = {
       val gpioManager = GpioFactory.getInstance
       val sensorButton  = gpioManager.provisionDigitalInputPin(pinConfiguration.presenceSensorPin, PinPullResistance.PULL_DOWN)
-      lockingLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.lockerActuatorPin,"LockingActuator", PinState.LOW)
-      freeLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.unlockedBikeFlagPin,"FreeLed", PinState.HIGH)
+      var initialLockingLedState = PinState.LOW
+      var initialFreeLedState = PinState.HIGH
+      if(this.isLocked) {
+        initialLockingLedState = PinState.HIGH
+        initialFreeLedState = PinState.LOW
+      }
+      lockingLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.lockerActuatorPin,"LockingActuator", initialLockingLedState)
+      freeLed = gpioManager.provisionDigitalOutputPin(pinConfiguration.unlockedBikeFlagPin,"FreeLed", initialFreeLedState)
 
       sensorButton addTrigger new GpioSetStateTrigger(PinState.HIGH, lockingLed, PinState.HIGH)
 
       sensorButton addTrigger checkAndLock
     }
+
 
     /**
       * Check if a bike is already locked, and if not lock one

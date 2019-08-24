@@ -27,12 +27,12 @@ trait WorkerVerticle extends ScalaVerticle {
 
 object WorkerVerticle {
 
-  def apply(vertxContext:Vertx, racketsConfiguration: List[(String, PhysicLayerMapper)]): WorkerVerticle =
+  def apply(vertxContext:Vertx, racketsConfiguration: List[(String, PhysicLayerMapper, Option[String])]): WorkerVerticle =
     new WorkerVerticleImpl(racketsConfiguration, vertxContext)
 
-  private class WorkerVerticleImpl(val racketsConfiguration: List[(String, PhysicLayerMapper)],
+  private class WorkerVerticleImpl(val racketsConfiguration: List[(String, PhysicLayerMapper, Option[String])],
                                    val vertxContext:Vertx) extends WorkerVerticle {
-    val bracketList = racketsConfiguration.map(config => RackBracket(config._1, config._2, vertxContext))
+    val bracketList = racketsConfiguration.map(config => RackBracket(config._1, config._2, config._3,vertxContext))
     val eventBus = vertxContext.eventBus
 
     override def onBracketLock(ipAddress: String): Unit = eventBus.publish(Topics.LOCK_SERVER_TOPIC, ipAddress)

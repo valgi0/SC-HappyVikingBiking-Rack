@@ -37,17 +37,24 @@ object Main extends App {
    .map(entry => {
     val ipAddress = entry.split(DEFAULT_IP_BRACKET_SEP)(0)
     val pinList = entry.split(DEFAULT_IP_BRACKET_SEP)(1).split(DEFAULT_PIN_SEPARATOR).map(_.toInt)
-    (ipAddress, PhysicLayerMapper(pinList(0), pinList(1), pinList(2)))
+     var optionalBikeID:Option[String] = None
+     if(entry.split(DEFAULT_IP_BRACKET_SEP).length > 2) {
+       optionalBikeID = Some(entry.split(DEFAULT_IP_BRACKET_SEP)(2))
+     }
+    (ipAddress, PhysicLayerMapper(pinList(0), pinList(1), pinList(2)), optionalBikeID)
    }).toList
 
  val racketList = ip_brackets_pinlist.split(DEFAULT_BRACKETS_SEPARATOR)
-   .map(_.split(DEFAULT_IP_BRACKET_SEP)(0)).toList
+   .map(entry => {
+    var optionalBikeID:Option[String] = None
+    if(entry.split(DEFAULT_IP_BRACKET_SEP).length > 2) {
+     optionalBikeID = Some(entry.split(DEFAULT_IP_BRACKET_SEP)(2))
+    }
+    (entry.split(DEFAULT_IP_BRACKET_SEP)(0), optionalBikeID)
+   }).toList
 
 
  val vertxContext = Vertx.vertx
- //val racketsConfiguration = List(("192.168.1.155", PhysicLayerMapper(6, 5, 4)))
- //val racketList = List("192.168.1.155")
-
 
  val workerVerticle = WorkerVerticle(vertxContext, racketsConfiguration)
 

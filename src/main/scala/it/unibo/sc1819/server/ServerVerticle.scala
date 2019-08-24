@@ -47,18 +47,16 @@ trait ServerVerticle extends ScalaVerticle {
 
 object ServerVerticle {
 
-  def apply(rackID:String, vertx: Vertx, bracketList:List[String], remoteServerIP:String, remoteServerPort:Int, port:Int): ServerVerticle =
+  def apply(rackID:String, vertx: Vertx, bracketList:List[(String, Option[String])], remoteServerIP:String, remoteServerPort:Int, port:Int): ServerVerticle =
     new ServerVerticleImpl(rackID,vertx, bracketList, remoteServerIP, remoteServerPort, port)
 
-  private class ServerVerticleImpl(val rackID:String, val vertxContext:Vertx, bracketList: List[String],
+  private class ServerVerticleImpl(val rackID:String, val vertxContext:Vertx, bracketList: List[(String, Option[String])],
                                    val remoteServerIP:String,val remoteServerPort:Int,
                                    val port:Int) extends ServerVerticle {
 
     val bracketMap = scala.collection.mutable.Map(
-      bracketList.map(ipAddress => {
-        val emptyString:Option[String] = None
-        ipAddress -> emptyString
-      }): _*)
+      bracketList.map(entry => {
+        entry._1 -> entry._2}): _*)
     val bracketQueue: mutable.Queue[String] = mutable.Queue()
     val eventBus = vertxContext.eventBus
     val webClient = WebClient(vertxContext)
@@ -91,10 +89,14 @@ object ServerVerticle {
 
     override def handleRestAPILock(routingContext: RoutingContext, response: RouterResponse): Unit = {
       val ipAddress = routingContext.request().remoteAddress().host()
+      println("IP Address = " + ipAddress)
       val bikeID = read[BikeIDMessage](routingContext.getBodyAsString().get).bikeID
+      println("Bike ID: " + bikeID)
+      println(bracketQueue.contains(ipAddress))
       bracketQueue.dequeueFirst(_.equals(ipAddress)) match {
-        case Some(element) => confirmCorrectLockAndNotifyServer(element, bikeID)
-          response.sendResponse(Message("Tutto ok"))
+        case Some(element) => { confirmCorrectLockAndNotifyServer(element, bikeID)
+          println("Conferma finita, invio risposta")
+          response.sendResponse(Message("Tutto ok")) }
         case None => errorHandler(response, "No Bike found")
 
       }
@@ -137,11 +139,11 @@ object ServerVerticle {
     private def notifyRemoteServerLock(bikeID:String, position:Int, tries:Int):Unit = {
       val newtries = tries + 1
       if(newtries < web.MAX_TRIES) {
-        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+        webClient.executeAPICall(remoteServerIP, HttpMethod.PUT, LOCK_API_PATH,remoteServerPort,
           web.handlerToOnlyFailureConversion(_ => notifyRemoteServerLock(bikeID, position,newtries)),
           Some(LockMessage(rackID, bikeID, position)))
       } else {
-        webClient.executeAPICall(remoteServerIP, HttpMethod.POST, LOCK_API_PATH,remoteServerPort,
+        webClient.executeAPICall(remoteServerIP, HttpMethod.PUT, LOCK_API_PATH,remoteServerPort,
           web.handlerToOnlyFailureConversion(_ => definitiveErrorHandler()), Some(LockMessage(rackID, bikeID, position)))
       }
 
